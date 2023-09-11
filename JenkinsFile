@@ -5,7 +5,7 @@ pipeline {
         TESTING_ENVIRONMENT = "test-env"
         STAGING_ENVIRONMENT = "staging-env"
         PRODUCTION_ENVIRONMENT = "my_first_pipeline"
-        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Email
+        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Email address
     }
     stages {
         stage('Build') {
@@ -22,18 +22,17 @@ pipeline {
         }
         stage('Code Analysis') {
             steps {
-                echo "Running integration tests"
-                }
+                echo "Analysing code using a code analysis tool"
             }
         }
         stage('Security Scan') {
             steps {
-                echo "Scanning the code for security"
+                echo "Scanning code for security"
             }
         }
         stage('Deploy to Staging') {
             steps {
-                echo "Deploying the application to staging environment: ${env.STAGING_ENVIRONMENT}"
+                echo "Deploying application to environment: ${env.STAGING_ENVIRONMENT}"
             }
         }
         stage('Integration Tests on Staging') {
@@ -43,7 +42,7 @@ pipeline {
         }
         stage('Deploy to Production') {
             steps {
-                echo "Deploying the application to production environment: ${env.PRODUCTION_ENVIRONMENT}"
+                echo "Deploying application to production environment: ${env.PRODUCTION_ENVIRONMENT}"
             }
             post {
                 always {
