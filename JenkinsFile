@@ -5,33 +5,19 @@ pipeline {
         TESTING_ENVIRONMENT = "test-env"
         STAGING_ENVIRONMENT = "staging-env"
         PRODUCTION_ENVIRONMENT = "my_first_pipeline"
-        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Email
+        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Email address
     }
     stages {
         stage('Build') {
             steps {
-                script {
-                    try {
-                        echo "Fetching the source code from the directory path: ${env.DIRECTORY_PATH}"
-                        echo "Compiling the code and generating artifacts"
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Error occurred during the Build stage: ${e.message}")
-                    }
-                }
+                echo "Fetching the source code from the directory path: ${env.DIRECTORY_PATH}"
+                echo "Compiling the code and generating artifacts"
             }
         }
         stage('Unit and Integration Tests') {
             steps {
-                script {
-                    try {
-                        echo "Running unit tests"
-                        echo "Running integration tests"
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Error occurred during the Unit and Integration Tests stage: ${e.message}")
-                    }
-                }
+                echo "Running unit tests"
+                echo "Running integration tests"
             }
         }
         stage('Code Analysis') {
@@ -48,14 +34,34 @@ pipeline {
                 }
             }
         }
+        stage('Security Scan') {
+            steps {
+                echo "Scanning code for security"
+            }
+        }
+        stage('Deploy to Staging') {
+            steps {
+                echo "Deploying application to environment: ${env.STAGING_ENVIRONMENT}"
+            }
+        }
+        stage('Integration Tests on Staging') {
+            steps {
+                echo "Running integration tests on environment"
+            }
+        }
+        stage('Deploy to Production') {
+            steps {
+                echo "Deploying application to production environment: ${env.PRODUCTION_ENVIRONMENT}"
+            }
+        }
     }
     post {
         always {
             script {
                 emailext subject: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}",
-                          body: "Pipeline ${currentBuild.result}: ${env.BUILD_URL}",
-                          to: env.RECIPIENT_EMAIL, // Email
-                          attachmentsPattern: '**/build.log'
+                        body: "Pipeline ${currentBuild.result}: ${env.BUILD_URL}",
+                        to: env.RECIPIENT_EMAIL, // Use the recipient's email address
+                        attachmentsPattern: '**/build.log'
             }
         }
     }
