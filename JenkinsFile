@@ -3,8 +3,9 @@ pipeline {
     environment {
         DIRECTORY_PATH = "/Users/teclaire/.jenkins/workspace/my_first_pipeline"
         TESTING_ENVIRONMENT = "test-env"
+        STAGING_ENVIRONMENT = "staging-env"
         PRODUCTION_ENVIRONMENT = "my_first_pipeline"
-        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Replace with the actual email address
+        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Email
     }
     stages {
         stage('Build') {
@@ -13,40 +14,48 @@ pipeline {
                 echo "Compiling the code and generating artifacts"
             }
         }
-        stage('Test') {
+        stage('Unit and Integration Tests') {
             steps {
                 echo "Running unit tests"
                 echo "Running integration tests"
             }
         }
-        stage('Code Quality Check') {
-            steps {
-                echo "Check the quality of the code"
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo "Deploy the application to a testing environment: ${env.TESTING_ENVIRONMENT}"
-            }
-        }
-        stage('Approval') {
+        stage('Code Analysis') {
             steps {
                 script {
-                    echo "Waiting 10 seconds for approval..."
+                    def scannerHome = tool name: 'SonarQube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    def scannerBat = bat(script: "${scannerHome}/bin/sonar-scanner.bat", returnStatus: true)
+                    if (scannerBat != 0) {
+                        error "SonarQube analysis failed"
+                    }
                 }
-                sleep time: 10, unit: 'SECONDS'
             }
         }
-        stage('Deploy to production') {
+        stage('Security Scan') {
             steps {
-                echo "Deploy the code to the production environment: ${env.PRODUCTION_ENVIRONMENT}"
+                echo "Scanning the code for security"
+            }
+        }
+        stage('Deploy to Staging') {
+            steps {
+                echo "Deploying the application to staging environment: ${env.STAGING_ENVIRONMENT}"
+            }
+        }
+        stage('Integration Tests on Staging') {
+            steps {
+                echo "Running integration tests on environment"
+            }
+        }
+        stage('Deploy to Production') {
+            steps {
+                echo "Deploying the application to production environment: ${env.PRODUCTION_ENVIRONMENT}"
             }
             post {
                 always {
                     script {
                         emailext subject: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}",
                                   body: "Pipeline ${currentBuild.result}: ${env.BUILD_URL}",
-                                  to: env.RECIPIENT_EMAIL, // Use variable
+                                  to: env.RECIPIENT_EMAIL, // Use the recipient's email address
                                   attachmentsPattern: '**/build.log'
                     }
                 }
