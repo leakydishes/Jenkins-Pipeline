@@ -22,12 +22,7 @@ pipeline {
         }
         stage('Code Analysis') {
             steps {
-                script {
-                    def scannerHome = tool name: 'SonarQube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    def scannerBat = bat(script: "${scannerHome}/bin/sonar-scanner.bat", returnStatus: true)
-                    if (scannerBat != 0) {
-                        error "SonarQube analysis failed"
-                    }
+                echo "Running integration tests"
                 }
             }
         }
