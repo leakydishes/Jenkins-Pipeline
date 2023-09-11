@@ -29,12 +29,7 @@ pipeline {
             steps {
                 echo "Scanning code for security"
             }
-        }
-        stage('Deploy to Staging') {
-            steps {
-                echo "Deploying application to environment: ${env.STAGING_ENVIRONMENT}"
-            }
-        }
+askhdg
         stage('Integration Tests on Staging') {
             steps {
                 echo "Running integration tests on environment"
