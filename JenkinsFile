@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Code Analysis') {
             steps {
-                echo "Running Code analysis"
+                echo "Running Code analysis in progress"
                 // Uncomment to run a failure email
                 // script {
                 //     echo "Performing code analysis using Static Analysis Utilities plugin"
