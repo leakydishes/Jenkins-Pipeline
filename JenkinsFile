@@ -5,64 +5,67 @@ pipeline {
         TESTING_ENVIRONMENT = "test-env"
         STAGING_ENVIRONMENT = "staging-env"
         PRODUCTION_ENVIRONMENT = "my_first_pipeline"
-        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Email address
+        RECIPIENT_EMAIL = 'te.clairee@gmail.com' // Email
     }
     stages {
         stage('Build') {
             steps {
-                echo "Fetching the source code from the directory path: ${env.DIRECTORY_PATH}"
-                echo "Compiling the code and generating artifacts"
+                script {
+                    try {
+                        echo "Fetching the source code from the directory path: ${env.DIRECTORY_PATH}"
+                        echo "Compiling the code and generating artifacts"
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Error occurred during the Build stage: ${e.message}")
+                    }
+                }
             }
         }
         stage('Unit and Integration Tests') {
             steps {
-                echo "Running unit tests"
-                echo "Running integration tests"
-            }
-        }
-        stage('Code Analysis') {
-            steps {
                 script {
                     try {
-                        echo "Performing code analysis using Static Analysis Utilities plugin"
-                        def analysisResults = scanForIssues tool: [$class: 'CheckStyle'], pattern: '**/checkstyle-result.xml'
-                        def totalIssues = analysisResults.getTotalSize()
-                        echo "Total code analysis issues found: ${totalIssues}"
-                        if (totalIssues > 0) {
-                            currentBuild.result = 'FAILURE'
-                        }
+                        echo "Running unit tests"
+                        echo "Running integration tests"
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
-                        error("Error occurred during code analysis: ${e.message}")
+                        error("Error occurred during the Unit and Integration Tests stage: ${e.message}")
                     }
                 }
             }
-        }   
-        stage('Security Scan') {
-            steps {
-                echo "Scanning code for security"
-            }
         }
-        stage('Deploy to Staging') {
+        // to create a fail for email
+        stage('Code Analysis') {
             steps {
-                echo "Deploying application to environment: ${env.STAGING_ENVIRONMENT}"
-            }
-        }
-        stage('Integration Tests on Staging') {
-            steps {
-                echo "Running integration tests on environment"
+                script {
+                    echo "Performing code analysis using Static Analysis Utilities plugin"
+                    def analysisResults = scanForIssues tool: [$class: 'CheckStyle'], pattern: '**/checkstyle-result.xml'
+                    def totalIssues = analysisResults.getTotalSize()
+                    echo "Total code analysis issues found: ${totalIssues}"
+                    if (totalIssues > 0) {
+                        currentBuild.result = 'FAILURE'
+                        error("Code analysis found issues")
+                    }
+                }
             }
         }
         stage('Deploy to Production') {
             steps {
-                echo "Deploying application to production environment: ${env.PRODUCTION_ENVIRONMENT}"
+                script {
+                    try {
+                        echo "Deploying application to production environment: ${env.PRODUCTION_ENVIRONMENT}"
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Error occurred during the Deploy to Production stage: ${e.message}")
+                    }
+                }
             }
             post {
                 always {
                     script {
                         emailext subject: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}",
                                   body: "Pipeline ${currentBuild.result}: ${env.BUILD_URL}",
-                                  to: env.RECIPIENT_EMAIL, // Use the recipient's email address
+                                  to: env.RECIPIENT_EMAIL, // Email
                                   attachmentsPattern: '**/build.log'
                     }
                 }
