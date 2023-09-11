@@ -34,7 +34,6 @@ pipeline {
                 }
             }
         }
-        // to create a fail for email
         stage('Code Analysis') {
             steps {
                 script {
@@ -49,26 +48,14 @@ pipeline {
                 }
             }
         }
-        stage('Deploy to Production') {
-            steps {
-                script {
-                    try {
-                        echo "Deploying application to production environment: ${env.PRODUCTION_ENVIRONMENT}"
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Error occurred during the Deploy to Production stage: ${e.message}")
-                    }
-                }
-            }
-            post {
-                always {
-                    script {
-                        emailext subject: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}",
-                                  body: "Pipeline ${currentBuild.result}: ${env.BUILD_URL}",
-                                  to: env.RECIPIENT_EMAIL, // Email
-                                  attachmentsPattern: '**/build.log'
-                    }
-                }
+    }
+    post {
+        always {
+            script {
+                emailext subject: "Pipeline ${currentBuild.result}: ${env.JOB_NAME}",
+                          body: "Pipeline ${currentBuild.result}: ${env.BUILD_URL}",
+                          to: env.RECIPIENT_EMAIL, // Email
+                          attachmentsPattern: '**/build.log'
             }
         }
     }
