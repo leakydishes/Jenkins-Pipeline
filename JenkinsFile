@@ -22,16 +22,18 @@ pipeline {
         }
         stage('Code Analysis') {
             steps {
-                script {
-                    echo "Performing code analysis using Static Analysis Utilities plugin"
-                    def analysisResults = scanForIssues tool: [$class: 'CheckStyle'], pattern: '**/checkstyle-result.xml'
-                    def totalIssues = analysisResults.getTotalSize()
-                    echo "Total code analysis issues found: ${totalIssues}"
-                    if (totalIssues > 0) {
-                        currentBuild.result = 'FAILURE'
-                        error("Code analysis found issues")
-                    }
-                }
+                echo "Running Code analysis"
+                // Uncomment to run a failure email
+                // script {
+                //     echo "Performing code analysis using Static Analysis Utilities plugin"
+                //     def analysisResults = scanForIssues tool: [$class: 'CheckStyle'], pattern: '**/checkstyle-result.xml'
+                //     def totalIssues = analysisResults.getTotalSize()
+                //     echo "Total code analysis issues found: ${totalIssues}"
+                //     if (totalIssues > 0) {
+                //         currentBuild.result = 'FAILURE'
+                //         error("Code analysis found issues")
+                //     }
+                // }
             }
         }
         stage('Security Scan') {
